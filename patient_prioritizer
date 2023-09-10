@@ -1,0 +1,193 @@
+// Erh-Chi Hsu
+// 02/13/2023
+// CSE 121 Section A
+// TA: Duncan Du
+//
+// Programming Assignment P2
+
+// This class creates a patient prioritizer
+// which calculates the priority by their 
+// age, zipcode, insurance status, pain level, and temperature.
+// The program provides suggestions 
+// based on their priority scores, and summarizes 
+// the statistic in the end.
+
+import java.util.*;
+public class PatientPrioritizer {
+    // set the hospital's zipcode as a constant
+    public static final int HOSPITAL_ZIP = 12345;
+
+    public static void main (String[] args){
+        // set console as new scanner
+        Scanner console = new Scanner(System.in);
+        // print introduction
+        introduction();
+        
+        // define number of total patients and 
+        // maximum score as zero for further use
+        int numPt = 0;
+        int maxScore = 0;
+        // define the input name as String
+        String name = patientName(console);
+        // create a while loop to 
+        // ask patient information until "quit" typed
+        while(!name.equals("quit")){
+            // call the patient information method
+            // and define it as an integer named score
+            int score = patientInfo(console);
+            // call the patient priority method
+            // using the name and score parameters defined lately
+            patientPriority(name, score);
+            // print the thanks note
+            System.out.println();
+            System.out.println("Thank you for using our system!");
+            System.out.println("We hope we have helped you do your best!");
+            System.out.println();
+            // each time the loop runs, add 1 to the number of patient 
+            numPt++;
+            // if the score generated is bigger than the previous one
+            // keep it as the maximum score
+            if (score >= maxScore){
+                maxScore = score;
+            }
+            // ask patient name at the end of the loop again
+            // so that the loop can end immediately if "quit" typed
+            name = patientName(console);
+        }
+        // once the while loop end
+        // call the method for overall statistic
+        // using the number of patient and maximum maxScore as parameters
+        overallStat(numPt, maxScore);
+    }
+    // 1. create a method printing the program's introduction message
+    public static void introduction (){
+        System.out.println("Hello! We value you and your time, so we will help");
+        System.out.println("you prioritize which patients to see next!");
+        System.out.println("Please answer the following questions about the next patient so");
+        System.out.println("we can help you do your best work :)");
+        System.out.println();
+    }
+
+    // 2. create a method getting a patient's name through user input
+    // use a scanner parameter
+    public static String patientName (Scanner console){
+        System.out.println("Please enter the next patient's name or \"quit\" to end the program.");
+        System.out.print("Patient's name: ");
+        String name = console.next();
+        return name;
+
+    }
+
+    // 3. create a method collecting the required patient information
+    // by a scanner parameter, 
+    // and compute the priority score
+    public static int patientInfo (Scanner console){
+        System.out.print("Patient age: ");
+        int age = console.nextInt();
+        System.out.print("Patient zip code: ");
+        int zipcode = console.nextInt();
+        // call the method to check if the zipcode has five digits
+        fiveDigits(zipcode);
+        // if no, keep asking until the input is valid
+        while(fiveDigits(zipcode)==false){
+            System.out.print("Invalid zip code, enter valid zip code: ");
+            zipcode = console.nextInt();
+        }
+        // if the zipcode is valid, ask the next question
+        System.out.print("Is our hospital \"in network\" for the patient's insurance? ");
+        String insur = console.next();
+        System.out.print("Patient pain level (1-10): ");
+        int pain = console.nextInt();
+        // if pain input is outside the range of 1-10
+        // keep asking until the input is valid
+        while( pain < 1 || pain > 10){
+            System.out.print("Invalid pain level, enter valid pain level (1-10): ");
+            pain = console.nextInt();
+        }
+        // if the pain level is valid, ask the next question
+        System.out.print("Patient temperature (in degrees Fahrenheit): ");
+        double temp = console.nextDouble();
+        System.out.println();
+        // call the priorityScore method
+        // using the parameters defined in this method
+        int score = priorityScore(age, zipcode, insur, pain, temp);
+        // return the score as integer
+        return score;
+    }
+
+    // 4. create a method calculating the priority score of the patient
+    // parameters include age, zip code, insurance status, pain level, and temperature
+    public static int priorityScore (int age, int zipcode, String insur, int pain, double temp){
+        // the score start with 100
+        int score = 100;
+        // add 50 when the patient is child or elderly
+        if (age < 12 || age>=75){
+            score = score + 50;
+        }
+        // add 25 if the first number of patient's zipcode 
+        // is the same as the hospital
+        if (zipcode / 10000 == HOSPITAL_ZIP / 10000){
+            score = score + 25;
+            // add more 15 if the first two numbers of patient's zipcode 
+            // are the same as the hospital
+            if (zipcode / 1000 == HOSPITAL_ZIP / 1000){
+                score = score + 15;
+            }
+        }
+        // add 50 if the patient is in network
+        if (insur.equals("yes") || insur.equals("y")){
+            score = score + 50;
+        }
+        // add pain level times 10 
+        score = score + pain*10;
+        // add 8 if the patient is having a fever
+        if (temp > 99.5){
+            score = score + 8;
+        }
+        // return the score as an integer
+        return score;
+    }
+
+    // 5. create a method printing the patient's priority
+    // using patient name and priority score as parameters
+    public static void patientPriority (String name, int score){
+        System.out.println("We have found patient " + name + " to have a priority score of: " + score);
+        // if the score >= 333, put them high priority
+        if (score >= 333){
+            System.out.println("We have determined this patient is high priority,");
+            System.out.println("and it is advised to call an appropriate medical provider ASAP.");
+        // if the 168 <= score < 333, put them medium priority
+        } else if (score >= 168 && score < 333){
+            System.out.println("We have determined this patient is medium priority.");
+            System.out.println("Please assign an appropriate medical provider to their case");
+            System.out.println("and check back in with the patient's condition in a little while.");
+        // others, put them low priority
+        } else {
+            System.out.println("We have determined this patient is low priority.");
+            System.out.println("Please put them on the waitlist for when a medical provider becomes available.");
+        }
+    }
+    // 6. create a method printing out the overall statistics for the day
+    // using total number of patients and the maximum score as parameters
+    public static void overallStat (int numPt, int maxScore){
+        System.out.println("Statistics for the day:");
+        System.out.println("..." + numPt + " patients were helped");
+        System.out.println("...the highest priority patient we saw had a score of " + maxScore);
+        System.out.println("Good job today!");
+    }
+
+    // 7. Takes in an integer input.
+    // Returns true if the integer has 5 digits, and false otherwise.
+    public static boolean fiveDigits(int val) {
+        val = val / 10000; // get first digit
+        if (val == 0) { // has less than 5 digits
+            return false;
+        } else if (val / 10 == 0) { // has 5 digits
+            return true;
+        } else { // has more than 5 digits
+            return false;
+        }
+        // NOTE: the above can be written with improved "boolean zen" as follows:
+        // return val != 0 && val / 10 == 0;
+    }
+}
